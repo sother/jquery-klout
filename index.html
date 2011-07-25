@@ -28,6 +28,15 @@
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
+  <script type="text/javascript" src="http://sother.github.com/jquery-klout/static/jquery.xdomainajax.js"></script>
+  <script type="text/javascript" src="http://sother.github.com/jquery-klout/jquery-klout.js"></script>
+  <script type="text/javascript">
+	$(document).ready(function() {
+		$('#showKlout').click(function() {
+			$('.klout').kloutScore('e6yj8afagaczyq9n33j8zwsp');
+		});
+	});
+  </script>
 </head>
 
 <body>
@@ -46,15 +55,31 @@
       <span class="small">by <a href="http://github.com/sother">sother</a></span></h1>
 
     <div class="description">
-      A simple jQuery plugin that renders the Klout score of a list of users, respecting the API limit of 10 requests per second.
+      A simple jQuery plugin that retrieves the Klout score of a large list of users, respecting the API limit of 5 users per request and 10 requests per second.
     </div>
 
-    <h2>Authors</h2>
-<p>Luciano Sother (http://sother.info)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Luciano Sother (http://sother.info)<br/>      </p>
+    <h2>Author</h2>
+	<p><a href="http://sother.info" target="_blank">Luciano Sother</a></p>
 
-
+    <h2>Example</h2>
+    <div class="description">Here are some of my company fellows. <a id="showKlout">Click</a> to show Klout Scores.</div>
+	alex_n_souza: <span class="klout">alex_n_souza</span><br/>
+	brunoborges: <span class="klout">brunoborges</span><br/>
+	cdavidnt: <span class="klout">cdavidnt</span><br/>
+	coutinhorafa: <span class="klout">coutinhorafa</span><br/>
+	dcmaximo: <span class="klout">dcmaximo</span><br/>
+	diogo_gonca: <span class="klout">diogo_gonca</span><br/>
+	fmcypriano: <span class="klout">fmcypriano</span><br/>
+	fracazo: <span class="klout">fracazo</span><br/>
+	gabriel_moreira: <span class="klout">gabriel_moreira</span><br/>
+	ihmoraes: <span class="klout">ihmoraes</span><br/>
+	juangaray22: <span class="klout">juangaray22</span><br/>
+	leonicolas: <span class="klout">leonicolas</span><br/>
+	marcomaciel: <span class="klout">marcomaciel</span><br/>
+	rodrigodaroz: <span class="klout">rodrigodaroz</span><br/>
+	ro_gama: <span class="klout">ro_gama</span><br/>
+	sother: <span class="klout">sother</span><br/>
+		
     <h2>Download</h2>
     <p>
       You can download this project in either
