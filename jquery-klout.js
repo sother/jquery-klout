@@ -131,7 +131,11 @@
 	                if (usernameBatches.length > 0) {
 	                    var elapsedMillis = (new Date()).getMilliseconds() - startMillis;
 	                    var delayMillis = 1000 - elapsedMillis;
-	                    setTimeout(callApi, delayMillis);
+	                    if (delayMillis <= 0) {
+	                    	callApi();
+	                    } else {
+	                    	setTimeout(callApi, delayMillis);
+	                    }
 	                } else {
 	                	options.complete(kloutScores, kloutScoresWithError);
 	                }
