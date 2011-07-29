@@ -1,38 +1,72 @@
 (function($) {
-    
-    $.fn.kloutScore = function(apiKey, userOptions) {
 
-        var KLOUT_API_INTERVAL_BETWEEN_CALLS_IN_MILLIS = 1000;
-        var KLOUT_API_MAX_INPUT_USERNAMES = 5;
-        
-        var options = $.extend({
-            iconSrc: 'http://sother.github.com/jquery-klout/static/klout-20.png',
-            success: function(username, kloutScore, options) {
-                $(this).html('<span class="jquery-klout-icon-span"><a href="http://klout.com/' + username + '"><img class="jquery-klout-icon" src="' + options.iconSrc + '"/></a></span>' + Math.round(kloutScore.kscore));
-            }
-        }, userOptions);
+    $.getKloutScores = function(usernames, userOptions) {
 
-        var elementsByUsername = [];
-        var usernames = [];
+    	var options = $.extend({
+    		complete: function(kloutScores, kloutScoresWithError) {}
+    	}, userOptions);
+ 
+		var strategy = {
+			processSuccessItems: $.noop(),
+        	processErrorItems: $.noop()
+		}
+
+    	kloutInternal(usernames, null, options, strategy);
+    };
+
+    $.fn.kloutScore = function(userOptions) {
+
+    	var elementsByUsername = {};
+    	var usernames = [];
+    	
+    	var options = $.extend({
+    		usernameGetter: function() {
+    			return $(this).data('klout-username');
+    		},
+    		batchItemSuccess: function(username, options, kloutScore) {
+    			$(this).html('<span class="jquery-klout-icon-span"><a href="http://klout.com/' + username + '"><img class="jquery-klout-icon" src="' + options.iconSrc + '"/></a></span>' + Math.round(kloutScore.kscore));
+    		},
+    		batchItemError: function(username, options, status) {
+    			$(this).html('<span class="jquery-klout-error">not found</span>');
+    		},
+    		complete: function(kloutScores, kloutScoresWithError) {}
+    	}, userOptions);
+ 
+		var strategy = {
+			processSuccessItems: function(usernameBatch, data) {
+				$.each(data.users, function(index, kloutScore){
+					$.each(elementsByUsername[kloutScore.twitter_screen_name], function(index, element) {
+						options.batchItemSuccess.apply(element.htmlElement, [element.username, options, kloutScore]);
+					});
+					delete elementsByUsername[kloutScore.twitter_screen_name];
+				});
+        	},
+        	processErrorItems: function(usernameBatch, textStatus) {
+                $.each(usernameBatch, function(index, username) {
+                    $.each(elementsByUsername[username] || [], function(index, element) {
+                        options.batchItemError.apply(element.htmlElement, [element.username, options, textStatus]);
+                    });
+                    delete elementsByUsername[username];
+                });
+        	}
+		}
+
         var elementCount = 0;
         var totalElements = this.length;
-        var usernameBatches = [];
-            
+        
         function addElement(element$) {
-            var username = element$.text();
-            var htmlElement = element$.get(0);
+        	var htmlElement = element$.get(0);
+            var username = options.usernameGetter.apply(htmlElement);
             var element = {'username': username, 'htmlElement': htmlElement};
             addElementByUsername(element, username);
             addUsername(username);
             if (++elementCount == totalElements) {
-                createBatches();
-                callApi();
+            	kloutInternal(usernames, elementsByUsername, options, strategy);
             }
         }
         
         function addElementByUsername(element, username) {
-            var elementsOfCurrentUsername = elementsByUsername[username];
-            elementsOfCurrentUsername = elementsOfCurrentUsername || [];
+            var elementsOfCurrentUsername = (elementsByUsername[username] || []);
             elementsOfCurrentUsername.push(element);
             elementsByUsername[username] = elementsOfCurrentUsername;
         }
@@ -42,12 +76,33 @@
                 usernames.push(username);
             }
         }
+
+        return this.each(function() {
+            addElement($(this));
+        });
+    };
+    
+    function kloutInternal(usernames, elementsByUsername, options, strategy) {
+
+    	var KLOUT_API_MAX_REQUESTS_PER_SECOND = 10;
+        var KLOUT_API_MAX_INPUT_USERNAMES = 5;
+        var YQL_KLOUT_SCORE_URL = "http://query.yahooapis.com/v1/public/yql?q=SELECT%20*%20FROM%20klout.score%20WHERE%20users%20in%20(USERNAMES)%20AND%20api_key%3D'" + options.apiKey + "'&format=json&env=http%3A%2F%2Fdatatables.org%2Falltables.env";
+
+        var usernameBatches = [];
+        var batchSize = KLOUT_API_MAX_REQUESTS_PER_SECOND * KLOUT_API_MAX_INPUT_USERNAMES;
+
+    	var kloutScores = [];
+    	var kloutScoresWithError = [];
+
+        function getUrl(usernameBatch) {
+        	return YQL_KLOUT_SCORE_URL.replace('USERNAMES', "'" + usernameBatch.join("'%2C%20'") + "'");
+        }
         
         function createBatches() {
             var currentUsernameBatch = [];
             $.each(usernames , function(index, username) {
                 currentUsernameBatch.push(username);
-                if (currentUsernameBatch.length == KLOUT_API_MAX_INPUT_USERNAMES) {
+                if (currentUsernameBatch.length == batchSize) {
                     usernameBatches.push(currentUsernameBatch);
                     currentUsernameBatch = [];    
                 }
@@ -60,33 +115,32 @@
         function callApi() {
             var startMillis = (new Date()).getMilliseconds();
             var currentUsernameBatch = usernameBatches.shift();
-            console.log(currentUsernameBatch);
-            var ajaxOptions = {
-                url: 'http://api.klout.com/1/klout.json?users='+currentUsernameBatch.join('%2C') + '&key=' + apiKey,
-                type: 'GET',
-                success: function(xmlHttp) {
-                    var responseHtml = xmlHttp.responseText;
-                    var dataJson = $($.parseXML(responseHtml)).find('p').text();
-                    var data = $.parseJSON(dataJson);
-                    for (var i = 0; i < data.users.length; i++) {
-                        var kloutScore = data.users[i];
-                        $.each(elementsByUsername[kloutScore.twitter_screen_name], function(index, element) {
-                            options.success.apply(element.htmlElement, [element.username, kloutScore, options]);
-                        });
-                    }
-                    if (usernameBatches.length > 0) {
-                        var elapsedMillis = (new Date()).getMilliseconds() - startMillis;
-                        var delayMillis = KLOUT_API_INTERVAL_BETWEEN_CALLS_IN_MILLIS - elapsedMillis;
-                        setTimeout(callApi, delayMillis);
-                    }
-                }
-            };
-            jQuery.ajax(ajaxOptions);
+            $.ajax({
+                url: getUrl(currentUsernameBatch),
+                dataType: 'jsonp',
+                success: function(yqlResult) {
+                	if (yqlResult.query.results && yqlResult.query.results.users && yqlResult.query.results.users.length > 0) {
+                		strategy.processSuccessItems(currentUsernameBatch, yqlResult.query.results)
+            			$.each(yqlResult.query.results.users, function(index, kloutScore){
+            				kloutScores.push(kloutScore)
+            			});
+                	}
+                	strategy.processErrorItems(currentUsernameBatch, 'not found');
+                },
+	            complete: function() {
+	                if (usernameBatches.length > 0) {
+	                    var elapsedMillis = (new Date()).getMilliseconds() - startMillis;
+	                    var delayMillis = 1000 - elapsedMillis;
+	                    setTimeout(callApi, delayMillis);
+	                } else {
+	                	options.complete(kloutScores, kloutScoresWithError);
+	                }
+	            }
+            });
         }
-        
-        return this.each(function() {
-            addElement($(this));
-        });
-    };
+    
+	    createBatches();
+	    callApi();
+    }
     
 })(jQuery);
