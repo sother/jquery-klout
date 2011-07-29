@@ -28,6 +28,7 @@
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
+  <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.2.min.js"></script>
   <script type="text/javascript" src="http://sother.github.com/jquery-klout/static/jquery.xdomainajax.js"></script>
   <script type="text/javascript" src="http://sother.github.com/jquery-klout/jquery-klout.js"></script>
   <script type="text/javascript">
@@ -37,6 +38,17 @@
 		});
 	});
   </script>
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18443216-4']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 </head>
 
 <body>
@@ -62,7 +74,7 @@
 	<p><a href="http://sother.info" target="_blank">Luciano Sother</a></p>
 
     <h2>Example</h2>
-    <div class="description">Here are some of my company fellows. <a id="showKlout">Click</a> to show Klout Scores.</div>
+    <div class="description">Here are some of my company fellows. <a id="showKlout" href="#">Click</a> to show Klout Scores.</div>
 	alex_n_souza: <span class="klout">alex_n_souza</span><br/>
 	brunoborges: <span class="klout">brunoborges</span><br/>
 	cdavidnt: <span class="klout">cdavidnt</span><br/>

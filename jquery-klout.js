@@ -6,7 +6,7 @@
         var KLOUT_API_MAX_INPUT_USERNAMES = 5;
         
         var options = $.extend({
-            iconSrc: 'http://sother.github.com/jquery-klout/static//klout-20.png',
+            iconSrc: 'http://sother.github.com/jquery-klout/static/klout-20.png',
             success: function(username, kloutScore, options) {
                 $(this).html('<span class="jquery-klout-icon-span"><a href="http://klout.com/' + username + '"><img class="jquery-klout-icon" src="' + options.iconSrc + '"/></a></span>' + Math.round(kloutScore.kscore));
             }
