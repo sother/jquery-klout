@@ -57,7 +57,7 @@
     <h2>Author</h2>
 	<p><a href="http://sother.info" target="_blank">Luciano Sother</a></p>
 
-    <h2>Example</h2>
+    <h2>Live Demo</h2>
     <div class="description">Here are some Twitter users I follow. <a id="showKlout" href="#"></a></div>
 
 <div class="user">2012ondazero <span class="klout" data-klout-username="2012ondazero"></span></div>
@@ -217,6 +217,22 @@
 <div class="user">_ygor_ <span class="klout" data-klout-username="_ygor_"></span></div>
 
 <br clear="both"/>
+    <h2>Sample Source Code</h2>
+    <strong>HTML (Original)</strong><br/>
+    <pre>&lt;span class="klout" data-klout-username="sother"&gt;&lt;/span&gt;</pre>
+    <strong>Javascript</strong><br/>
+    <pre>$('.klout').kloutScore({
+    'apiKey': '...', // CHANGE this to your own Klout API Key
+    'iconSrc': '...', // CHANGE this to your own hosted Klout icon
+});</pre>
+    <strong>HTML (Processed by default icon & score rendering method)</strong><br/>
+    <pre>&lt;span class="klout" data-klout-username="sother"&gt;
+    &lt;span class="jquery-klout-icon-span"&gt;
+        &lt;a href="http://klout.com/sother"&gt;
+            &lt;img class="jquery-klout-icon" src="..."/&gt;
+        &lt;/a&gt;
+    &lt;/span&gt;
+&lt;/span&gt;</pre>
     <h2>Download</h2>
     <p>
       You can download this project in either
